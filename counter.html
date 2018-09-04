@@ -1,0 +1,71 @@
+<html>
+
+<head>
+	<title>Plain HTML Sandbox</title>
+</head>
+
+<body>
+  <div id="app">
+
+	  Counter {{counter}}
+	  <button v-on:click="increment()">Increment</button>
+	  <button v-on:click="reset()">Reset</button>
+	<button v-on:click="update()">Update</button>
+  </div>
+
+  <script src="https://unpkg.com/vue"></script>
+
+  <script>
+
+    var app = new Vue({
+      el:"#app",
+      data: {
+       counter: 0, 
+       databaseUrl: 'https://boesch-4.firebaseio.com/temp-winx.json',
+      },
+	  mounted: function () { //Will start at zero if you don't update on init
+        this.update();
+      },
+    methods:{
+        increment: function(){
+          this.counter++
+          this.setRemoteCounter(this.counter)
+        },
+        
+        reset: function(){
+          // Post to the counter to set it to zero. 
+          this.counter = 0
+		      this.setRemoteCounter(this.counter)          
+        },
+        
+				 setRemoteCounter: function(newVal){ 
+           // Post to the counter to set it to zero. 
+           fetch(this.databaseUrl, { 
+              method:'put', 
+              body: JSON.stringify({'counter':newVal})
+				    }) 
+            .then(res=>res.json()) 
+            .then(res => { 
+              //console.log(res) 
+              this.update() 
+              }); 
+         },
+        update: function() {
+			    fetch(this.databaseUrl) 
+          .then((response) => { 
+            return response.json(); }) 
+          .then((myJson) => { 
+            console.log("Updated remote counter",myJson)
+            if(myJson) {
+                this.counter = myJson.counter
+            }
+			        
+            });
+        }
+      }
+    })
+
+  </script>
+</body>
+
+</html>
